@@ -6,6 +6,7 @@ from fastapi import FastAPI, HTTPException
 from fastapi.responses import FileResponse, JSONResponse
 from pydantic import BaseModel
 from typing import List, Dict, Any
+from datetime import datetime 
 
 app = FastAPI()
 TEMP_DIR = "/tmp/csv_files"
@@ -55,3 +56,13 @@ async def generate(req: CSVRequest):
         })
     except Exception as e:
         raise HTTPException(500, detail=str(e))
+
+# api/index.py (맨 아래에 추가)
+
+@app.get("/")
+async def root():
+    return {"message": "CSV Generator API 실행 중", "endpoints": ["/generate", "/health", "/download/..."]}
+
+@app.get("/health")
+async def health():
+    return {"status": "OK", "time": datetime.now().isoformat()}
