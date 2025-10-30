@@ -1,4 +1,4 @@
-# api/index.py
+"""# api/index.py
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -13,8 +13,9 @@ async def health():
 
 @app.post("/api/generate")
 async def generate():
-    return {"error": "Not implemented yet"}
-"""# api/index.pys
+    return {"error": "Not implemented yet"}"""
+
+# api/index.pys
 import os
 import uuid
 import importlib
@@ -81,4 +82,4 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "OK", "time": datetime.now().isoformat()}"""
+    return {"status": "OK", "time": datetime.now().isoformat()}
