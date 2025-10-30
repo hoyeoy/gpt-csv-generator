@@ -1,20 +1,3 @@
-"""# api/index.py
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.get("/")
-async def root():
-    return {"message": "Hello from Vercel!"}
-
-@app.get("/health")
-async def health():
-    return {"status": "OK"}
-
-@app.post("/api/generate")
-async def generate():
-    return {"error": "Not implemented yet"}"""
-
 # api/index.py
 import os
 import uuid
