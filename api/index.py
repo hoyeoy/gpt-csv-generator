@@ -63,7 +63,7 @@ async def generate(req: CSVRequest):
         filepath = os.path.join(TEMP_DIR, filename)
         df.to_csv(filepath, index=False, encoding="utf-8-sig")
 
-        download_url = f"https://{os.getenv('VERCEL_URL', 'your-app.vercel.app')}/api/download/{filename}"
+        download_url = f"https://{os.getenv('VERCEL_URL', 'your-app.vercel.app')}/download/{filename}"
 
         return JSONResponse({
             "message": f"{req.operation} 완료!",
