@@ -1,4 +1,4 @@
-# api/operations/thebell_news.py
+# api/operations/api/operations/newsclipping_thebell.py
 import csv
 import io
 import time
@@ -32,6 +32,8 @@ def run(params: dict = None):
     print(f"[{target_date}] 수집 시작")
     while page <= max_pages:
         url = f"https://www.thebell.co.kr/free/content/article.asp?page={page}&svccode=00"
+        # url = f"https://www.thebell.co.kr/free/content/list.asp?type=news&date={date_str}"
+        print(f"  페이지 {page}: {url}")
         try:
             resp = requests.get(url, headers=headers, timeout=10)
             resp.raise_for_status()
