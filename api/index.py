@@ -1,4 +1,20 @@
 # api/index.py
+from fastapi import FastAPI
+
+app = FastAPI()
+
+@app.get("/")
+async def root():
+    return {"message": "Hello from Vercel!"}
+
+@app.get("/health")
+async def health():
+    return {"status": "OK"}
+
+@app.get("/api/generate")
+async def generate():
+    return {"error": "Not implemented yet"}
+"""# api/index.pys
 import os
 import uuid
 import importlib
@@ -65,4 +81,4 @@ async def root():
 
 @app.get("/health")
 async def health():
-    return {"status": "OK", "time": datetime.now().isoformat()}
+    return {"status": "OK", "time": datetime.now().isoformat()}"""
