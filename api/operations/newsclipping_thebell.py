@@ -82,7 +82,7 @@ def run(params: dict = None):
     # ---------- CSV 생성 (메모리) ----------
     output = io.StringIO()
     writer = csv.writer(output)
-    writer.writerow(["URL", "Title", "Body", "Hyperlink"])
+    writer.writerow(["URL", "Title"]) # , "Body", "Hyperlink"s
 
     for url, title, body in zip(urls, titles, bodies):
         safe_url = quote(url, safe=":/?=&%#")
