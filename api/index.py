@@ -11,7 +11,7 @@ async def root():
 async def health():
     return {"status": "OK"}
 
-@app.get("/api/generate")
+@app.post("/api/generate")
 async def generate():
     return {"error": "Not implemented yet"}
 """# api/index.pys
