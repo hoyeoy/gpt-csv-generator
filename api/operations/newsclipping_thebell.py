@@ -1,18 +1,17 @@
-# api/operations/api/operations/newsclipping_thebell.py
-import csv
-import io
+# api/operations/newsclipping_thebell.py
 import time
 from datetime import datetime, timedelta
-from urllib.parse import urljoin, quote
+from urllib.parse import urljoin
 
 import requests
 from bs4 import BeautifulSoup
+import pandas as pd
 
 
 def run(params: dict = None):
     """
-    params: dict (optional)
-        - days_ago: int  (default 1 → 어제)
+    params:
+        - days_ago: int (default 1 → 어제)
     반환: pandas.DataFrame
     """
     params = params or {}
@@ -29,11 +28,11 @@ def run(params: dict = None):
         )
     }
 
-    print(f"[{target_date}] 수집 시작")
+    print(f"[{target_date}] The Bell 뉴스 수집 시작")
     while page <= max_pages:
         url = f"https://www.thebell.co.kr/free/content/article.asp?page={page}&svccode=00"
-        # url = f"https://www.thebell.co.kr/free/content/list.asp?type=news&date={date_str}"
         print(f"  페이지 {page}: {url}")
+
         try:
             resp = requests.get(url, headers=headers, timeout=10)
             resp.raise_for_status()
@@ -49,13 +48,12 @@ def run(params: dict = None):
                 if not date_span or not date_span.get_text(strip=True).startswith(target_date):
                     continue
 
-                # 제목
                 dt = dl.find("dt")
                 title = dt.get_text(strip=True) if dt else ""
-                # 요약
+
                 dd = dl.find("dd")
                 body = dd.get_text(strip=True).replace("\n", " ").replace("\r", " ") if dd else ""
-                # URL
+
                 a = dl.find("a")
                 href = a.get("href") if a else ""
                 full_url = urljoin("https://www.thebell.co.kr/free/content/", href)
@@ -65,7 +63,7 @@ def run(params: dict = None):
                     bodies.append(body)
                     urls.append(full_url)
                     has_today = True
-                    print(f"  - {title}")
+                    print(f"    → {title}")
 
             if not has_today and page > 1:
                 print(f"  페이지 {page} 이후 오늘 기사 없음 → 종료")
@@ -75,21 +73,17 @@ def run(params: dict = None):
 
             page += 1
             time.sleep(0.7)
+
         except Exception as e:
             print(f"  페이지 {page} 오류: {e}")
             break
 
-    # ---------- CSV 생성 (메모리) ----------
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(["URL", "Title"]) # , "Body", "Hyperlink"s
+    # DataFrame 생성
+    df = pd.DataFrame({
+        "URL": urls,
+        "Title": titles,
+        "Summary": bodies
+    })
 
-    for url, title, body in zip(urls, titles, bodies):
-        safe_url = quote(url, safe=":/?=&%#")
-        hyperlink = f'=HYPERLINK("{safe_url}", "{title.replace('"', '""')}")'
-        writer.writerow([url, title, body, hyperlink])
-
-    # DataFrame 으로 반환 (CSV 저장 로직은 index.py 에서 처리)
-    import pandas as pd
-    df = pd.read_csv(io.StringIO(output.getvalue()))
+    print(f"총 {len(df)}개 기사 수집 완료")
     return df
