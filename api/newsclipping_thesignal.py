@@ -6,7 +6,6 @@ import time
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta
-from http.server import BaseHTTPRequestHandler
 
 # === 설정 ===
 BASE_URL = "https://signalm.sedaily.com/Main/Content/SubMain"
