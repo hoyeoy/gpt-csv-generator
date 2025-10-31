@@ -2,14 +2,14 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/newsclipping_thesignal.py",
+      "src": "api/index.py",
       "use": "@vercel/python"
     }
   ],
   "routes": [
     {
       "src": "/api/newsclipping_thesignal",
-      "dest": "/api/newsclipping_thesignal.py"
+      "dest": "/api/index.py"
     }
   ]
 }
