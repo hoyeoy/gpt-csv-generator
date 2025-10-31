@@ -1,32 +1,4 @@
-# api/newsclipping_thesignal.py (테스트용 최소 코드)
-import io
-import csv
-
-
-def handler(event, context=None):
-
-    fieldnames = ["title", "link", "summary", "published_at"]
-
-    # 테스트 데이터
-    articles = [
-        {"title": "Test Title", "link": "https://example.com", "summary": "Test summary", "published_at": "2025-10-31 12:00"}
-    ]
-
-    output = io.StringIO()
-    writer = csv.DictWriter(output, fieldnames=fieldnames)
-    writer.writeheader()
-    writer.writerows(articles)
-    csv_content = output.getvalue()
-
-    return {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "text/csv; charset=utf-8",
-            "Content-Disposition": "attachment; filename=test.csv"
-        },
-        "body": csv_content
-    }
-
+from newsclipping_thesignal import handler 
 
 """# api/index.py
 import os
