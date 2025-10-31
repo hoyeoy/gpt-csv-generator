@@ -97,24 +97,28 @@ def scrape_recent_articles():
 
     return all_articles
 
-# === Vercel HTTP 핸들러 ===
-class handler(BaseHTTPRequestHandler):
-    def do_GET(self):
-        # 1. 뉴스 수집
-        articles = scrape_recent_articles()
+# === Vercel 핸들러 (올바른 형식) ===
+async def handler(request: Any) -> dict[str, Any]:
+    """Vercel Serverless Function 핸들러"""
+    # 1. 뉴스 수집
+    articles = scrape_recent_articles()
 
-        # 2. CSV 메모리 생성
-        output = io.StringIO()
-        writer = csv.DictWriter(output, fieldnames=fieldnames)
-        writer.writeheader()
-        for art in articles:
-            writer.writerow(art)
+    # 2. CSV 생성
+    output = io.StringIO()
+    writer = csv.DictWriter(output, fieldnames=fieldnames)
+    writer.writeheader()
+    for art in articles:
+        writer.writerow(art)
 
-        csv_bytes = output.getvalue().encode("utf-8")
+    csv_content = output.getvalue().encode("utf-8")
 
-        # 3. 응답 전송
-        self.send_response(200)
-        self.send_header("Content-Type", "text/csv; charset=utf-8")
-        self.send_header("Content-Disposition", "attachment; filename=news_24h.csv")
-        self.end_headers()
-        self.wfile.write(csv_bytes)
+    # 3. 응답 반환
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "text/csv; charset=utf-8",
+            "Content-Disposition": "attachment; filename=news_24h.csv",
+            "Access-Control-Allow-Origin": "*",  # CORS 허용
+        },
+        "body": csv_content.decode("utf-8")  # 문자열로 반환
+    }
