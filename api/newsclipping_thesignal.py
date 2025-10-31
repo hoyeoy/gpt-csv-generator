@@ -97,28 +97,34 @@ def scrape_recent_articles():
 
     return all_articles
 
-# === Vercel 핸들러 (올바른 형식) ===
-async def handler(request: Any) -> dict[str, Any]:
-    """Vercel Serverless Function 핸들러"""
-    # 1. 뉴스 수집
-    articles = scrape_recent_articles()
+def handler(request):
+    """Vercel 동기 핸들러 (더 안정적)"""
+    try:
+        # 1. 뉴스 수집
+        articles = scrape_recent_articles()
 
-    # 2. CSV 생성
-    output = io.StringIO()
-    writer = csv.DictWriter(output, fieldnames=fieldnames)
-    writer.writeheader()
-    for art in articles:
-        writer.writerow(art)
+        # 2. CSV 생성
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=fieldnames)
+        writer.writeheader()
+        for art in articles:
+            writer.writerow(art)
 
-    csv_content = output.getvalue().encode("utf-8")
+        csv_content = output.getvalue()
 
-    # 3. 응답 반환
-    return {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "text/csv; charset=utf-8",
-            "Content-Disposition": "attachment; filename=news_24h.csv",
-            "Access-Control-Allow-Origin": "*",  # CORS 허용
-        },
-        "body": csv_content.decode("utf-8")  # 문자열로 반환
-    }
+        # 3. 응답
+        return {
+            "statusCode": 200,
+            "headers": {
+                "Content-Type": "text/csv; charset=utf-8",
+                "Content-Disposition": "attachment; filename=news_24h.csv",
+                "Access-Control-Allow-Origin": "*",
+                "Cache-Control": "no-cache"
+            },
+            "body": csv_content
+        }
+    except Exception as e:
+        return {
+            "statusCode": 500,
+            "body": f"Error: {str(e)}"
+        }
