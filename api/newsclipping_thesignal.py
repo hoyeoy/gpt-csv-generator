@@ -2,9 +2,11 @@
 import io
 import csv
 
-fieldnames = ["title", "link", "summary", "published_at"]
 
 def handler(event, context=None):
+
+    fieldnames = ["title", "link", "summary", "published_at"]
+
     # 테스트 데이터
     articles = [
         {"title": "Test Title", "link": "https://example.com", "summary": "Test summary", "published_at": "2025-10-31 12:00"}
