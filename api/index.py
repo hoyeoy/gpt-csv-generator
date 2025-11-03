@@ -1,132 +1,106 @@
-import io
+from flask import Flask, Response
+import requests
+from bs4 import BeautifulSoup
 import csv
+from datetime import datetime, timedelta
+import io
+import time
+import re
+
+app = Flask(__name__)
+
+BASE_URL = "https://signalm.sedaily.com/Main/Content/SubMain"
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+    "Referer": "https://signalm.sedaily.com/",
+    "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8"
+}
+CUTOFF_TIME = datetime.now() - timedelta(hours=24)
+
+fieldnames = ["title", "link", "summary", "published_at"]
+
+# === 기존 함수들 그대로 사용 ===
+def parse_time_text(time_str):
+    return datetime.strptime(time_str.strip(), "%Y-%m-%d %H:%M")
+
+def get_page_articles(page):
+    params = {"NClass": "GX11", "Page": page, "Kind": "Time"}
+    try:
+        resp = requests.get(BASE_URL, params=params, headers=HEADERS, timeout=10)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, 'html.parser')
+    except Exception as e:
+        print(f"페이지 {page} 요청 실패: {e}")
+        return []
+
+    news_list = soup.select("div.contPadding")
+    if not news_list:
+        return []
+
+    articles = []
+    for item in news_list:
+        try:
+            a_tag = item.select_one("a")
+            if not a_tag:
+                continue
+            title_tag = a_tag.select_one("strong")
+            title = title_tag.get_text(strip=True) if title_tag else None
+            link = "https://signalm.sedaily.com" + a_tag['href'] if a_tag['href'].startswith('/') else a_tag['href']
+            time_tag = item.select_one("span.time")
+            if not time_tag:
+                continue
+            published_at = parse_time_text(time_tag.get_text())
+            summary_tag = item.select_one("span.mmsn_con")
+            summary = summary_tag.get_text(strip=True) if summary_tag else ""
+            articles.append({
+                "title": title,
+                "link": link,
+                "summary": summary,
+                "published_at": published_at.strftime("%Y-%m-%d %H:%M")
+            })
+        except Exception as e:
+            print(f"기사 파싱 오류: {e}")
+            continue
+    return articles
 
 
-def handler(event, context=None):
-
-    fieldnames = ["title", "link", "summary", "published_at"]
-
-    # 테스트 데이터
-    articles = [
-        {"title": "Test Title", "link": "https://example.com", "summary": "Test summary", "published_at": "2025-10-31 12:00"}
-    ]
-
+# === Flask 엔드포인트 ===
+@app.route("/api/crawl_news", methods=["GET"])
+def crawl_news():
+    """24시간 내 뉴스 스크래핑 후 CSV로 반환"""
     output = io.StringIO()
     writer = csv.DictWriter(output, fieldnames=fieldnames)
     writer.writeheader()
-    writer.writerows(articles)
-    csv_content = output.getvalue()
 
-    return {
-        "statusCode": 200,
-        "headers": {
-            "Content-Type": "text/csv; charset=utf-8",
-            "Content-Disposition": "attachment; filename=test.csv"
-        },
-        "body": csv_content
-    }
+    all_articles = []
+    page = 1
+    max_pages = 10
 
-"""# api/index.py
-import os
-import uuid
-import importlib
-from fastapi import FastAPI, HTTPException
-from fastapi.responses import FileResponse, JSONResponse
-from pydantic import BaseModel
-from typing import Dict, Any
-from datetime import datetime
+    while page <= max_pages:
+        articles = get_page_articles(page)
+        if not articles:
+            break
 
-import pandas as pd
-from openpyxl import Workbook
-from openpyxl.utils.dataframe import dataframe_to_rows
-from openpyxl.styles import Font
+        for art in articles:
+            pub_dt = datetime.strptime(art["published_at"], "%Y-%m-%d %H:%M")
+            if pub_dt >= CUTOFF_TIME:
+                writer.writerow(art)
+                all_articles.append(art)
+            else:
+                # 오래된 기사면 종료
+                page = max_pages + 1
+                break
+        page += 1
+        time.sleep(0.8)
 
-app = FastAPI()
-TEMP_DIR = "/tmp/csv_files"
-os.makedirs(TEMP_DIR, exist_ok=True)
+    csv_bytes = output.getvalue().encode("cp949")
+    output.close()
 
-
-class CSVRequest(BaseModel):
-    operation: str
-    params: Dict[str, Any] = {}
-    format: str = "csv"  # "csv" or "xlsx"
-
-
-def load_operation(op: str):
-    try:
-        mod = importlib.import_module(f".operations.{op}", package="api")
-        if not hasattr(mod, "run"):
-            raise ValueError("run() 함수가 없습니다.")
-        return mod.run
-    except Exception as e:
-        raise HTTPException(status_code=400, detail=f"작업 로드 실패: {e}")
-
-
-@app.get("/")
-async def root():
-    return {
-        "message": "CSV/XLSX Generator API",
-        "endpoints": ["/generate", "/health", "/download/..."]
-    }
-
-
-@app.get("/health")
-async def health():
-    return {"status": "OK", "time": datetime.now().isoformat()}
-
-
-@app.get("/download/{filename}")
-async def download(filename: str):
-    path = os.path.join(TEMP_DIR, filename)
-    if not os.path.exists(path):
-        raise HTTPException(404, "파일을 찾을 수 없습니다.")
-    return FileResponse(path, filename=filename)
-
-
-@app.post("/generate")
-async def generate(req: CSVRequest):
-    try:
-        run_fn = load_operation(req.operation)
-        df = run_fn(req.params)  # DataFrame 수신
-
-        if df.empty:
-            return JSONResponse({"message": "수집된 데이터 없음", "rows": 0})
-
-        # 고유 파일명 생성
-        ext = "xlsx" if req.format == "xlsx" else "csv"
-        filename = f"{req.operation}_{uuid.uuid4().hex[:8]}.{ext}"
-        filepath = os.path.join(TEMP_DIR, filename)
-
-        # 저장
-        if req.format == "xlsx":
-            # XLSX 저장 + 하이퍼링크
-            with pd.ExcelWriter(filepath, engine='openpyxl') as writer:
-                df.to_excel(writer, index=False, sheet_name='News')
-                worksheet = writer.sheets['News']
-
-                # URL 열에 하이퍼링크 적용 (B열)
-                for row in range(2, len(df) + 2):
-                    cell = worksheet.cell(row=row, column=1)  # URL 열
-                    if cell.value:
-                        cell.hyperlink = cell.value
-                        cell.style = "Hyperlink"
-                        cell.font = Font(color="0000FF", underline="single")
-
-        else:
-            # CSV 저장
-            df.to_csv(filepath, index=False, encoding="utf-8-sig")
-
-        # 다운로드 URL
-        base_url = os.getenv('VERCEL_URL', 'your-app.vercel.app')
-        download_url = f"https://{base_url}/download/{filename}"
-
-        return JSONResponse({
-            "message": f"{req.operation} 완료!",
-            "rows": len(df),
-            "format": req.format.upper(),
-            "download_url": download_url,
-            "expires_in": "30분 후 자동 삭제"
-        })
-
-    except Exception as e:
-        raise HTTPException(500, detail=f"처리 중 오류: {str(e)}")"""
+    # Flask Response로 CSV 파일 다운로드 전송
+    return Response(
+        csv_bytes,
+        mimetype="text/csv",
+        headers={
+            "Content-Disposition": f"attachment; filename=news_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
+        }
+    )
