@@ -143,14 +143,15 @@ def search_google_news_for_company(company_name):
 # 🚀 Flask 엔드포인트
 # ===============================
 @app.route("/api/startuprecipe", methods=["GET"])
+@app.route("/api/startuprecipe", methods=["GET"])
 def crawl_startuprecipe():
     """
     GET /api/startuprecipe
     → 어제 날짜 기준 스타트업리시피 투자 기사 + 관련 구글뉴스 결과를 JSON으로 반환
     """
-    df_companies = crawl_startup_invest()
+    companies = crawl_startup_invest()  # ✅ list[dict] 반환
 
-    if df_companies.empty:
+    if not companies:   # ✅ list는 빈 경우 이렇게 검사
         return jsonify({
             "date_range": f"{YESTERDAY} ~ {TODAY}",
             "count": 0,
@@ -159,15 +160,15 @@ def crawl_startuprecipe():
         })
 
     results = []
-    for _, row in df_companies.iterrows():
-        company = row['company']
+    for company_info in companies:  # ✅ list 요소는 dict
+        company = company_info['company']
         print(f"🔎 {company} 뉴스 검색 중...")
         news = search_google_news_for_company(company)
 
         results.append({
             "company": company,
-            "stage": row['stage'],
-            "startup_link": row['startup_link'],
+            "stage": company_info['stage'],
+            "startup_link": company_info['startup_link'],
             "news_title": news['title'],
             "news_link": news['link']
         })
@@ -177,6 +178,7 @@ def crawl_startuprecipe():
         "count": len(results),
         "articles": results
     })
+
 
 """@app.route("/api/startuprecipe/debug")
 def debug_request():
