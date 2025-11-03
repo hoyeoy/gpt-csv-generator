@@ -12,10 +12,10 @@ app = Flask(__name__)
 # ===============================
 # 🔧 기본 설정
 # ===============================
-# YESTERDAY = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-# TODAY = datetime.now().strftime('%Y-%m-%d')
-YESTERDAY = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
-TODAY = (datetime.now() - timedelta(days=1))
+YESTERDAY = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+TODAY = datetime.now().strftime('%Y-%m-%d')
+"""YESTERDAY = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
+TODAY = (datetime.now() - timedelta(days=1))"""
 
 headers = {
     'User-Agent': (
@@ -147,7 +147,7 @@ def crawl_startuprecipe():
             "date_range": f"{YESTERDAY} ~ {TODAY}",
             "count": 0,
             "articles": [],
-            "message": "어제 날짜에 해당하는 투자 기사 없음."
+            "message": "No news for yesterday."
         })
 
     results = []
