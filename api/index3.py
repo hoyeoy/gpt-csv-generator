@@ -22,10 +22,7 @@ headers = {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0"
-    ),
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-    "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
-    "Referer": "https://www.google.com/",
+    )
 }
 
 TITLE_KEYWORDS = ['투자', '유치', '선정', '지원금', '시리즈', '스타트업']
@@ -84,8 +81,10 @@ def crawl_startup_invest():
         })
 
     df = pd.DataFrame(results).drop_duplicates(subset=['company'])
-    # print(f"✅ 전처리 완료: {len(df)}개 기업 추출")
-    return df
+    # 내부 처리에는 pandas 사용
+    df["company"] = df["company"].str.strip()
+    # 리턴할 때만 변환
+    return df.to_dict(orient="records")
 
 
 # ===============================
@@ -173,7 +172,7 @@ def crawl_startuprecipe():
         "articles": results
     })
 
-@app.route("/api/startuprecipe/debug")
+"""@app.route("/api/startuprecipe/debug")
 def debug_request():
     try:
         resp = requests.get("https://startuprecipe.co.kr/invest", headers=headers, timeout=10)
@@ -182,4 +181,4 @@ def debug_request():
             "html_snippet": resp.text[:500]
         })
     except Exception as e:
-        return jsonify({"error": str(e)})
+        return jsonify({"error": str(e)})"""
