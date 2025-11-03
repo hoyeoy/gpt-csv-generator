@@ -1,10 +1,8 @@
-from flask import Flask, Response, jsonify, request
+from flask import Flask, jsonify
 import requests
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
-from urllib.parse import urljoin, quote
-import io
-import csv
+from datetime import datetime
+from urllib.parse import urljoin
 import time
 
 app = Flask(__name__)
@@ -61,7 +59,13 @@ def get_todays_news():
 
                 # 요약
                 dd_tag = dl.find('dd')
-                body = dd_tag.get_text(strip=True).replace('\n', ' ').replace('\r', ' ').replace('\t', ' ') if dd_tag else ''
+                body = (
+                    dd_tag.get_text(strip=True)
+                    .replace('\n', ' ')
+                    .replace('\r', ' ')
+                    .replace('\t', ' ')
+                    if dd_tag else ''
+                )
 
                 # 링크
                 a_tag = dl.find('a')
@@ -87,66 +91,25 @@ def get_todays_news():
 
 
 # -----------------------------
-# 🔹 CSV 변환 함수
-# -----------------------------
-def create_csv_bytes(titles, bodies, urls):
-    """메모리 내에서 CSV 생성 후 bytes 반환"""
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(['URL', 'Title', 'Body', 'Hyperlink'])
-
-    for url, title, body in zip(urls, titles, bodies):
-        safe_url = quote(url, safe=':/?=&%#')
-        hyperlink = f'=HYPERLINK("{safe_url}", "{title.replace("\"", "\"\"")}")'
-        writer.writerow([url, title, body, hyperlink])
-
-    csv_bytes = output.getvalue().encode('utf-8-sig')
-    output.close()
-    return csv_bytes
-
-
-# -----------------------------
 # 🔹 Flask 엔드포인트
 # -----------------------------
 @app.route("/api/thebell", methods=["GET"])
 def crawl_thebell():
     """
-    예시:
-    GET /api/thebell?format=csv  → CSV 파일 다운로드
-    GET /api/thebell?format=json → JSON 데이터 반환
+    GET /api/thebell
+    → JSON 형식으로 오늘 뉴스 데이터 반환
     """
-    # 1️⃣ 크롤링 실행
     titles, bodies, urls = get_todays_news()
     articles = [
         {"title": t, "body": b, "url": u}
         for t, b, u in zip(titles, bodies, urls)
     ]
 
-    # 2️⃣ 요청 포맷 확인
-    fmt = request.args.get("format", "csv").lower()
-
-    # 3️⃣ CSV로 응답
-    if fmt == "csv":
-        csv_bytes = create_csv_bytes(titles, bodies, urls)
-        filename = f"thebell_news_{datetime.now().strftime('%Y%m%d')}.csv"
-        return Response(
-            csv_bytes,
-            mimetype="text/csv",
-            headers={
-                "Content-Disposition": f"attachment; filename={filename}"
-            }
-        )
-
-    # 4️⃣ JSON으로 응답
-    elif fmt == "json":
-        return jsonify({
-            "date": datetime.now().strftime("%Y-%m-%d"),
-            "count": len(articles),
-            "articles": articles
-        })
-
-    else:
-        return jsonify({"error": "지원하지 않는 format입니다. csv 또는 json 중 선택하세요."}), 400
+    return jsonify({
+        "date": datetime.now().strftime("%Y-%m-%d"),
+        "count": len(articles),
+        "articles": articles
+    })
 
 
 # -----------------------------
