@@ -65,7 +65,7 @@ def get_page_articles(page):
 
 
 # === Flask 엔드포인트 ===
-@app.route("/api/thesignaml", methods=["GET"])
+@app.route("/api/thesignal", methods=["GET"])
 def thesignal():
     """24시간 내 뉴스 스크래핑 후 CSV로 반환"""
     output = io.StringIO()
