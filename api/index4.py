@@ -6,13 +6,14 @@ import time
 from urllib.parse import urljoin, quote
 import io
 import csv
+from pytz import timezone
 
 app = Flask(__name__)
 
 # ===============================
 # 🔧 기본 설정
 # ===============================
-YESTERDAY = (datetime.now() - timedelta(days=1)).strftime('%Y.%m.%d')
+YESTERDAY = (datetime.now(timezone('Asia/Seoul')) - timedelta(days=1)).strftime('%Y.%m.%d')
 TODAY = datetime.now().strftime('%Y.%m.%d')
 
 HEADERS = {
@@ -131,25 +132,16 @@ def create_csv_bytes(titles, bodies, urls):
 def crawl_investchosun():
     """
     GET /api/investchosun
-    → 어제 날짜 기준 인베스트조선 기사 수집 후 JSON 또는 CSV로 반환
+    → 어제 날짜 기준 인베스트조선 기사 수집 후 JSON 반환
     """
-    fmt = request.args.get("format", "json").lower()
+     
     titles, bodies, urls = get_todays_investchosun_news()
 
     articles = [
         {"title": t, "body": b, "url": u}
         for t, b, u in zip(titles, bodies, urls)
     ]
-
-    if fmt == "csv":
-        csv_bytes = create_csv_bytes(titles, bodies, urls)
-        filename = f"investchosun_news_{datetime.now().strftime('%Y%m%d')}.csv"
-        return Response(
-            csv_bytes,
-            mimetype="text/csv",
-            headers={"Content-Disposition": f"attachment; filename={filename}"}
-        )
-
+ 
     return jsonify({
         "date": YESTERDAY,
         "count": len(articles),
