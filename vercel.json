@@ -1,15 +1,11 @@
 {
   "version": 2,
-  "functions": {
-    "api/*.py": {
-      "runtime": "python3.9",
-      "maxDuration": 60,
-      "regions": ["icn1"]   
-    }
-  },
+  "builds": [
+    { "src": "api/*.py", "use": "@vercel/python" }
+  ],
   "routes": [
     { "src": "/api/startuprecipe", "dest": "api/index3.py" },
     { "src": "/api/thebell", "dest": "api/index2.py" },
-    { "src": "/api/(.*)", "dest": "api/index.py" }
+    { "src": "/api/thesignal", "dest": "api/index.py" }
   ]
 }
