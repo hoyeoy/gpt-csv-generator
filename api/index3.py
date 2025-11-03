@@ -173,4 +173,13 @@ def crawl_startuprecipe():
         "articles": results
     })
 
- 
+@app.route("/api/startuprecipe/debug")
+def debug_request():
+    try:
+        resp = requests.get("https://startuprecipe.co.kr/invest", headers=headers, timeout=10)
+        return jsonify({
+            "status_code": resp.status_code,
+            "html_snippet": resp.text[:500]
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)})
