@@ -81,7 +81,7 @@ def crawl_startup_invest():
         })
 
     df = pd.DataFrame(results).drop_duplicates(subset=['company'])
-    print(f"✅ 전처리 완료: {len(df)}개 기업 추출")
+    # print(f"✅ 전처리 완료: {len(df)}개 기업 추출")
     return df
 
 
