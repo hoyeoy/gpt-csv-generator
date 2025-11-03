@@ -12,8 +12,10 @@ app = Flask(__name__)
 # ===============================
 # 🔧 기본 설정
 # ===============================
-YESTERDAY = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
-TODAY = datetime.now().strftime('%Y-%m-%d')
+# YESTERDAY = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+# TODAY = datetime.now().strftime('%Y-%m-%d')
+YESTERDAY = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
+TODAY = (datetime.now() - timedelta(days=1))
 
 headers = {
     'User-Agent': (
@@ -23,7 +25,7 @@ headers = {
     )
 }
 
-TITLE_KEYWORDS = ['투자', '유치', '선정', '지원금', '시리즈']
+TITLE_KEYWORDS = ['투자', '유치', '선정', '지원금', '시리즈', '스타트업']
 
 
 # ===============================
