@@ -6,13 +6,14 @@ import pandas as pd
 import re
 import time
 import urllib.parse
+from pytz import timezone
 
 app = Flask(__name__)
 
 # ===============================
 # 🔧 기본 설정
 # ===============================
-YESTERDAY = (datetime.now() - timedelta(days=1)).strftime('%Y-%m-%d')
+YESTERDAY = (datetime.now(timezone('Asia/Seoul')) - timedelta(days=1)).strftime('%Y-%m-%d')
 TODAY = datetime.now().strftime('%Y-%m-%d')
 """YESTERDAY = (datetime.now() - timedelta(days=2)).strftime('%Y-%m-%d')
 TODAY = (datetime.now() - timedelta(days=1))"""
@@ -85,6 +86,7 @@ def crawl_startup_invest():
         })
 
     df = pd.DataFrame(results).drop_duplicates(subset=['company'])
+
     # 내부 처리에는 pandas 사용
     df["company"] = df["company"].str.strip()
     # 리턴할 때만 변환
