@@ -22,7 +22,11 @@ headers = {
         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
         "AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/130.0.0.0 Safari/537.36 Edg/130.0.0.0"
-    )
+    ),
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8",
+    "Referer": "https://www.google.com/",
+    "Connection": "keep-alive",
 }
 
 TITLE_KEYWORDS = ['투자', '유치', '선정', '지원금', '시리즈', '스타트업']
@@ -51,8 +55,8 @@ def crawl_startup_invest():
 
     for row in rows:
         cols = row.find_all('td')
-        if len(cols) < 5:
-            continue
+        """if len(cols) < 5:
+            continue"""
 
         date_text = cols[0].get_text(strip=True)
         company_text = cols[1].get_text(strip=True)
