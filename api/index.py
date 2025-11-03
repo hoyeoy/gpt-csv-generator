@@ -1,4 +1,4 @@
-from flask import Flask, Response
+from flask import Flask, Response, jsonify
 import requests
 from bs4 import BeautifulSoup
 import csv
@@ -93,7 +93,7 @@ def crawl_news():
         page += 1
         time.sleep(0.8)
 
-    csv_bytes = output.getvalue().encode("cp949")
+    """csv_bytes = output.getvalue().encode("cp949")
     output.close()
 
     # Flask Response로 CSV 파일 다운로드 전송
@@ -103,4 +103,18 @@ def crawl_news():
         headers={
             "Content-Disposition": f"attachment; filename=news_{datetime.now().strftime('%Y%m%d_%H%M')}.csv"
         }
-    )
+    )"""
+
+    # ✅ CSV 대신 JSON 반환
+    return jsonify({
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M"),
+        "count": len(all_articles),
+        "articles": all_articles
+    })
+
+"""// 기존: res.setHeader("Content-Type", "text/csv");
+// 수정: res.setHeader("Content-Type", "application/json");
+
+// CSV → JSON 변환
+const data = await getNewsData();
+return res.status(200).json(data);"""
