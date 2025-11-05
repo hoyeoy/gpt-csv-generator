@@ -13,7 +13,7 @@ app = Flask(__name__)
 # ===============================
 # 🔧 기본 설정
 # ===============================
-YESTERDAY = (datetime.now(timezone('Asia/Seoul')) - timedelta(days=1)).strftime('%Y-%m-%d')
+YESTERDAY = (datetime.now(timezone('Asia/Seoul')) - timedelta(hours=24)).strftime('%Y-%m-%d')
 TODAY = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d')
 #YESTERDAY = (datetime.now() - timedelta(hours=24)).strftime('%Y-%m-%d')
 #TODAY = datetime.now().strftime('%Y-%m-%d')

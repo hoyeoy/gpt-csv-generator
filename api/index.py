@@ -20,6 +20,8 @@ CUTOFF_TIME = datetime.now() - timedelta(hours=24)
 
 fieldnames = ["title", "link", "summary", "published_at"]
 
+ 
+
 # === 기존 함수들 그대로 사용 ===
 def parse_time_text(time_str):
     return datetime.strptime(time_str.strip(), "%Y-%m-%d %H:%M")

@@ -12,8 +12,8 @@ app = Flask(__name__)
 # 🔹 뉴스 크롤링 함수
 # -----------------------------
 def get_todays_news():
-    # today_str = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d')
-    today_str = datetime.now().strftime('%Y-%m-%d')
+    today_str = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d')
+    # today_str = datetime.now().strftime('%Y-%m-%d')
     titles, bodies, urls = [], [], []
 
     page = 1
