@@ -65,7 +65,7 @@ def crawl_startup_invest():
         company_text = cols[1].get_text(strip=True)
         stage_text = cols[4].get_text(strip=True)
 
-        if date_text != YESTERDAY:
+        if date_text != (YESTERDAY or TODAY):
             continue
         if '인수합병' in stage_text:
             continue
