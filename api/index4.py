@@ -85,7 +85,7 @@ def get_todays_investchosun_news():
 
                 date_text = date_span.get_text(strip=True).strip()
 
-                if date_text != (YESTERDAY or TODAY):
+                if date_text not in (YESTERDAY, TODAY):
                     continue
 
                 if full_url in urls:

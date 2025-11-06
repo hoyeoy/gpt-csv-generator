@@ -108,7 +108,7 @@ def crawl_thebell():
     ]
 
     return jsonify({
-        "date": datetime.now().strftime("%Y-%m-%d"),
+        "date": datetime.now(timezone('Asia/Seoul')).strftime("%Y-%m-%d"),
         "count": len(articles),
         "articles": articles
     })
