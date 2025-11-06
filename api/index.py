@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 import io
 import time
 import re
+from pytz import timezone
 
 
 app = Flask(__name__)
@@ -16,7 +17,7 @@ HEADERS = {
     "Referer": "https://signalm.sedaily.com/",
     "Accept-Language": "ko-KR,ko;q=0.9,en;q=0.8"
 }
-CUTOFF_TIME = datetime.now() - timedelta(hours=24)
+CUTOFF_TIME = datetime.now(timezone('Asia/Seoul')) - timedelta(hours=24)
 
 fieldnames = ["title", "link", "summary", "published_at"]
 
