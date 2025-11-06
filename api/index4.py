@@ -145,7 +145,7 @@ def crawl_investchosun():
     ]
  
     return jsonify({
-        "date": YESTERDAY,
+        "date": TODAY,
         "count": len(articles),
         "articles": articles
     })
