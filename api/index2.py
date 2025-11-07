@@ -14,7 +14,7 @@ app = Flask(__name__)
 def get_todays_news():
     today_str = datetime.now(timezone('Asia/Seoul')).strftime('%Y-%m-%d')
     # today_str = datetime.now().strftime('%Y-%m-%d')
-    titles, bodies, urls = [], [], []
+    titles, bodies, urls, dates = [], [], []
 
     page = 1
     max_pages = 50
@@ -77,6 +77,8 @@ def get_todays_news():
                 titles.append(title)
                 bodies.append(body)
                 urls.append(full_url)
+                dates.append(date_text)
+
                 page_has_today = True
 
             if not page_has_today and page > 1:
@@ -89,7 +91,7 @@ def get_todays_news():
             print(f"❌ {page}페이지 오류: {e}")
             break
 
-    return titles, bodies, urls, today_str
+    return titles, bodies, urls, dates
 
 
 # -----------------------------
