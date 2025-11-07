@@ -32,7 +32,7 @@ HEADERS = {
 # 📰 인베스트조선 뉴스 크롤러
 # ===============================
 def get_todays_investchosun_news():
-    titles, bodies, urls = [], [], []
+    titles, bodies, urls, dates = [], [], [], []
     page = 1
     max_pages = 30
 
@@ -94,6 +94,8 @@ def get_todays_investchosun_news():
                 titles.append(title)
                 bodies.append(body)
                 urls.append(full_url)
+                dates.append(date_text)
+
                 page_has_today = True
 
             if not page_has_today and page > 1:
@@ -106,7 +108,7 @@ def get_todays_investchosun_news():
             print(f"❌ {page}페이지 오류: {e}")
             break
 
-    return titles, bodies, urls
+    return titles, bodies, urls, dates
 
 
 # ===============================
@@ -137,11 +139,11 @@ def crawl_investchosun():
     → 어제 날짜 기준 인베스트조선 기사 수집 후 JSON 반환
     """
      
-    titles, bodies, urls = get_todays_investchosun_news()
+    titles, bodies, urls, dates = get_todays_investchosun_news()
 
     articles = [
-        {"title": t, "body": b, "url": u}
-        for t, b, u in zip(titles, bodies, urls)
+        {"title": t, "body": b, "url": u, "dates": d}
+        for t, b, u, d in zip(titles, bodies, urls, dates)
     ]
  
     return jsonify({
