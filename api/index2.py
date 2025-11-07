@@ -77,7 +77,7 @@ def get_todays_news():
                 titles.append(title)
                 bodies.append(body)
                 urls.append(full_url)
-                dates.append(date_text)
+                dates.append(today_str)
 
                 page_has_today = True
 
