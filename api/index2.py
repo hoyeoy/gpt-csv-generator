@@ -101,10 +101,10 @@ def crawl_thebell():
     GET /api/thebell
     → JSON 형식으로 오늘 뉴스 데이터 반환
     """
-    titles, bodies, urls = get_todays_news()
+    titles, bodies, urls, dates = get_todays_news()
     articles = [
-        {"title": t, "body": b, "url": u}
-        for t, b, u in zip(titles, bodies, urls)
+        {"title": t, "body": b, "url": u, "date": d}
+        for t, b, u, d in zip(titles, bodies, urls, dates)
     ]
 
     return jsonify({
