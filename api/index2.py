@@ -89,7 +89,7 @@ def get_todays_news():
             print(f"❌ {page}페이지 오류: {e}")
             break
 
-    return titles, bodies, urls
+    return titles, bodies, urls, date_text
 
 
 # -----------------------------
