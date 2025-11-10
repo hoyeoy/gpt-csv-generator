@@ -94,7 +94,8 @@ def crawl_startup_invest():
     # 내부 처리에는 pandas 사용
     df["company"] = df["company"].str.strip()
     # 리턴할 때만 변환
-    return df.to_dict(orient="records")
+    # return df.to_dict(orient="records")
+    return df.to_dict(orient="records") if not df.empty else []  # ✅ 항상 list 반환
 
 
 # ===============================
