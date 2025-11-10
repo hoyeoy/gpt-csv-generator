@@ -89,13 +89,17 @@ def crawl_startup_invest():
             'startup_link': link
         })
 
+    if not results:
+        print("⚠️ 어제 또는 오늘 날짜의 투자 기업이 없습니다.")
+        return []
+
+
     df = pd.DataFrame(results).drop_duplicates(subset=['company'])
 
     # 내부 처리에는 pandas 사용
     df["company"] = df["company"].str.strip()
     # 리턴할 때만 변환
-    # return df.to_dict(orient="records")
-    return df.to_dict(orient="records") if not df.empty else []  # ✅ 항상 list 반환
+    return df.to_dict(orient="records")
 
 
 # ===============================
