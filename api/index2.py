@@ -104,6 +104,11 @@ def crawl_thebell():
     → JSON 형식으로 오늘 뉴스 데이터 반환
     """
     titles, bodies, urls, dates = get_todays_news()
+
+    # Requests too large 오류 -> 기사 수 100개로 제한 
+    titles, bodies, urls, dates = titles[:100], bodies[:100], urls[:100], dates[:100]
+
+
     articles = [
         {"title": t, "body": b, "url": u, "date": d}
         for t, b, u, d in zip(titles, bodies, urls, dates)
