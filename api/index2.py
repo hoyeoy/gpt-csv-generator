@@ -7,6 +7,28 @@ import time
 from pytz import timezone
 
 app = Flask(__name__)
+# -----------------------------
+# 🔹 유료 기사 여부 확인 함수
+# -----------------------------
+def is_free_article(url, headers):
+    try:
+        resp = requests.get(url, headers=headers, timeout=10)
+        resp.raise_for_status()
+        soup = BeautifulSoup(resp.text, 'html.parser')
+
+        article_main = soup.find('div', id='article_main')
+        if not article_main:
+            return False  # article_main 없으면 이상 → 제외
+
+        # 유료화 문구 확인
+        text = article_main.get_text(strip=True)
+        if "유료기사" in text or "기사가 존재하지 않습니다" in text:
+            return False
+
+        return True
+    except Exception as e:
+        print(f"기사 확인 실패 ({url}): {e}")
+        return False
 
 # -----------------------------
 # 🔹 뉴스 크롤링 함수
@@ -73,6 +95,18 @@ def get_todays_news():
                 a_tag = dl.find('a')
                 href = a_tag.get('href') if a_tag else ''
                 full_url = urljoin("https://www.thebell.co.kr/free/content/", href) if href else ''
+                if not full_url: # 유료 확인 시 추가 
+                    continue
+
+                # 유료 여부 확인
+                if is_free_article(full_url, headers):
+                    titles.append(title)
+                    bodies.append(body)
+                    urls.append(full_url)
+                    dates.append(date_text)
+                    page_has_today = True
+                else:
+                    print(f"유료 기사 제외: {title}")
 
                 titles.append(title)
                 bodies.append(body)
@@ -86,7 +120,9 @@ def get_todays_news():
                 break
 
             page += 1
-            time.sleep(0.6)
+            # ime.sleep(0.6)
+            time.sleep(1.2)  # 요청 간격 증가 (서버 부하 방지)
+            
         except Exception as e:
             print(f"❌ {page}페이지 오류: {e}")
             break
