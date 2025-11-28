@@ -7,6 +7,7 @@
     { "src": "/api/investchosun", "dest": "api/index4.py" },
     { "src": "/api/startuprecipe", "dest": "api/index3.py" },
     { "src": "/api/thebell", "dest": "api/index2.py" },
-    { "src": "/api/thesignal", "dest": "api/index.py" }
+    { "src": "/api/thesignal", "dest": "api/index.py" },
+    { "src": "/api/parse_article", "dest": "api/index5.py" }
   ]
 }
