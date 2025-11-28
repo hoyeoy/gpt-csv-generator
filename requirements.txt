@@ -4,5 +4,4 @@ beautifulsoup4
 lxml
 pandas
 pytz
-
 readability-lxml
