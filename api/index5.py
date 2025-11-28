@@ -1,3 +1,5 @@
+# readability-lxml를 활용해서 url 제공 시 뉴스 기사의 본문을 파싱하는 api 
+
 from flask import Flask, jsonify, Response, request
 import requests
 from bs4 import BeautifulSoup
@@ -7,6 +9,7 @@ from urllib.parse import urljoin, quote
 import io
 import csv
 from pytz import timezone
+from readability import Document  # readability-lxml 패키지 import (설치 필요: pip install readability-lxml)
 
 
 app = Flask(__name__)
@@ -152,6 +155,43 @@ def crawl_investchosun():
         "count": len(articles),
         "articles": articles
     })
+
+
+@app.route("/api/parse_article", methods=["GET"])
+def parse_article():
+    """
+    GET /api/parse_article?url=<뉴스_URL>
+    → 제공된 뉴스 URL의 본문을 readability-lxml로 파싱하여 JSON으로 반환
+    - url 파라미터가 필수입니다.
+    - 반환: {"title": "기사 제목", "content": "본문 텍스트"}
+    """
+    url = request.args.get('url')
+    if not url:
+        return jsonify({"error": "URL 파라미터가 필요합니다."}), 400
+
+    try:
+        # URL에서 페이지 내용 가져오기
+        response = requests.get(url, headers=HEADERS, timeout=10)
+        response.raise_for_status()
+
+        # readability-lxml로 본문 추출
+        doc = Document(response.text)
+        title = doc.title()
+        content_html = doc.summary()
+
+        # HTML에서 순수 텍스트 추출 (필요에 따라 유지하거나 조정 가능)
+        soup = BeautifulSoup(content_html, 'html.parser')
+        content_text = soup.get_text(strip=True)
+
+        return jsonify({
+            "title": title,
+            "content": content_text
+        })
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": f"URL 요청 오류: {str(e)}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"파싱 오류: {str(e)}"}), 500
 
 
 # ===============================
